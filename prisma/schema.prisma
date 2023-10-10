@@ -1,0 +1,3659 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model ab_email_domain {
+  id     Int    @id(map: "pk_ab_email_domain") @default(autoincrement())
+  domain String @unique
+  props  Json   @default("{}")
+  groups Json   @default("{}")
+}
+
+model admin_event_entity {
+  id               String  @id(map: "constraint_admin_event_entity") @db.VarChar(36)
+  admin_event_time BigInt?
+  realm_id         String? @db.VarChar(255)
+  operation_type   String? @db.VarChar(255)
+  auth_realm_id    String? @db.VarChar(255)
+  auth_client_id   String? @db.VarChar(255)
+  auth_user_id     String? @db.VarChar(255)
+  ip_address       String? @db.VarChar(255)
+  resource_path    String? @db.VarChar(2550)
+  representation   String?
+  error            String? @db.VarChar(255)
+  resource_type    String? @db.VarChar(64)
+}
+
+model associated_policy {
+  policy_id                                                                             String                 @db.VarChar(36)
+  associated_policy_id                                                                  String                 @db.VarChar(36)
+  resource_server_policy_associated_policy_associated_policy_idToresource_server_policy resource_server_policy @relation("associated_policy_associated_policy_idToresource_server_policy", fields: [associated_policy_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsr5s213xcx4wnkog82ssrfy")
+  resource_server_policy_associated_policy_policy_idToresource_server_policy            resource_server_policy @relation("associated_policy_policy_idToresource_server_policy", fields: [policy_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpas14xcx4wnkog82ssrfy")
+
+  @@id([policy_id, associated_policy_id], map: "constraint_farsrpap")
+  @@index([associated_policy_id], map: "idx_assoc_pol_assoc_pol_id")
+}
+
+model authentication_execution {
+  id                  String               @id(map: "constraint_auth_exec_pk") @db.VarChar(36)
+  alias               String?              @db.VarChar(255)
+  authenticator       String?              @db.VarChar(36)
+  realm_id            String?              @db.VarChar(36)
+  flow_id             String?              @db.VarChar(36)
+  requirement         Int?
+  priority            Int?
+  authenticator_flow  Boolean              @default(false)
+  auth_flow_id        String?              @db.VarChar(36)
+  auth_config         String?              @db.VarChar(36)
+  authentication_flow authentication_flow? @relation(fields: [flow_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_auth_exec_flow")
+  realm               realm?               @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_auth_exec_realm")
+
+  @@index([flow_id], map: "idx_auth_exec_flow")
+  @@index([realm_id, flow_id], map: "idx_auth_exec_realm_flow")
+}
+
+model authentication_flow {
+  id                       String                     @id(map: "constraint_auth_flow_pk") @db.VarChar(36)
+  alias                    String?                    @db.VarChar(255)
+  description              String?                    @db.VarChar(255)
+  realm_id                 String?                    @db.VarChar(36)
+  provider_id              String                     @default("basic-flow") @db.VarChar(36)
+  top_level                Boolean                    @default(false)
+  built_in                 Boolean                    @default(false)
+  realm                    realm?                     @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_auth_flow_realm")
+  authentication_execution authentication_execution[]
+
+  @@index([realm_id], map: "idx_auth_flow_realm")
+}
+
+model authenticator_config {
+  id       String  @id(map: "constraint_auth_pk") @db.VarChar(36)
+  alias    String? @db.VarChar(255)
+  realm_id String? @db.VarChar(36)
+  realm    realm?  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_auth_realm")
+
+  @@index([realm_id], map: "idx_auth_config_realm")
+}
+
+model authenticator_config_entry {
+  authenticator_id String  @db.VarChar(36)
+  value            String?
+  name             String  @db.VarChar(255)
+
+  @@id([authenticator_id, name], map: "constraint_auth_cfg_pk")
+}
+
+model broker_link {
+  identity_provider   String  @db.VarChar(255)
+  storage_provider_id String? @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+  broker_user_id      String? @db.VarChar(255)
+  broker_username     String? @db.VarChar(255)
+  token               String?
+  user_id             String  @db.VarChar(255)
+
+  @@id([identity_provider, user_id], map: "constr_broker_link_pk")
+}
+
+model client {
+  id                           String                      @id(map: "constraint_7") @db.VarChar(36)
+  enabled                      Boolean                     @default(false)
+  full_scope_allowed           Boolean                     @default(false)
+  client_id                    String?                     @db.VarChar(255)
+  not_before                   Int?
+  public_client                Boolean                     @default(false)
+  secret                       String?                     @db.VarChar(255)
+  base_url                     String?                     @db.VarChar(255)
+  bearer_only                  Boolean                     @default(false)
+  management_url               String?                     @db.VarChar(255)
+  surrogate_auth_required      Boolean                     @default(false)
+  realm_id                     String?                     @db.VarChar(36)
+  protocol                     String?                     @db.VarChar(255)
+  node_rereg_timeout           Int?                        @default(0)
+  frontchannel_logout          Boolean                     @default(false)
+  consent_required             Boolean                     @default(false)
+  name                         String?                     @db.VarChar(255)
+  service_accounts_enabled     Boolean                     @default(false)
+  client_authenticator_type    String?                     @db.VarChar(255)
+  root_url                     String?                     @db.VarChar(255)
+  description                  String?                     @db.VarChar(255)
+  registration_token           String?                     @db.VarChar(255)
+  standard_flow_enabled        Boolean                     @default(true)
+  implicit_flow_enabled        Boolean                     @default(false)
+  direct_access_grants_enabled Boolean                     @default(false)
+  always_display_in_console    Boolean                     @default(false)
+  realm                        realm?                      @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_p56ctinxxb9gsk57fo49f9tac")
+  client_attributes            client_attributes[]
+  client_default_roles         client_default_roles[]
+  client_node_registrations    client_node_registrations[]
+  client_scope_client          client_scope_client[]
+  protocol_mapper              protocol_mapper[]
+  redirect_uris                redirect_uris[]
+  scope_mapping                scope_mapping[]
+  web_origins                  web_origins[]
+
+  @@unique([realm_id, client_id], map: "uk_b71cjlbenv945rb6gcon438at")
+  @@index([client_id], map: "idx_client_id")
+}
+
+model client_attributes {
+  client_id String  @db.VarChar(36)
+  value     String? @db.VarChar(4000)
+  name      String  @db.VarChar(255)
+  client    client  @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk3c47c64beacca966")
+
+  @@id([client_id, name], map: "constraint_3c")
+}
+
+model client_auth_flow_bindings {
+  client_id    String  @db.VarChar(36)
+  flow_id      String? @db.VarChar(36)
+  binding_name String  @db.VarChar(255)
+
+  @@id([client_id, binding_name], map: "c_cli_flow_bind")
+}
+
+model client_default_roles {
+  client_id String @db.VarChar(36)
+  role_id   String @unique(map: "uk_8aelwnibji49avxsrtuf6xjow") @db.VarChar(36)
+  client    client @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_nuilts7klwqw2h8m2b5joytky")
+
+  @@id([client_id, role_id], map: "constr_client_default_roles")
+  @@index([client_id], map: "idx_client_def_roles_client")
+}
+
+model client_initial_access {
+  id              String @id(map: "cnstr_client_init_acc_pk") @db.VarChar(36)
+  realm_id        String @db.VarChar(36)
+  timestamp       Int?
+  expiration      Int?
+  count           Int?
+  remaining_count Int?
+  realm           realm  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_client_init_acc_realm")
+
+  @@index([realm_id], map: "idx_client_init_acc_realm")
+}
+
+model client_node_registrations {
+  client_id String @db.VarChar(36)
+  value     Int?
+  name      String @db.VarChar(255)
+  client    client @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk4129723ba992f594")
+
+  @@id([client_id, name], map: "constraint_84")
+}
+
+model client_scope {
+  id                        String                      @id(map: "pk_cli_template") @db.VarChar(36)
+  name                      String?                     @db.VarChar(255)
+  realm_id                  String?                     @db.VarChar(36)
+  description               String?                     @db.VarChar(255)
+  protocol                  String?                     @db.VarChar(255)
+  realm                     realm?                      @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_realm_cli_scope")
+  client_scope_attributes   client_scope_attributes[]
+  client_scope_client       client_scope_client[]
+  client_scope_role_mapping client_scope_role_mapping[]
+  default_client_scope      default_client_scope[]
+  protocol_mapper           protocol_mapper[]
+
+  @@unique([realm_id, name], map: "uk_cli_scope")
+  @@index([realm_id], map: "idx_realm_clscope")
+}
+
+model client_scope_attributes {
+  scope_id     String       @db.VarChar(36)
+  value        String?      @db.VarChar(2048)
+  name         String       @db.VarChar(255)
+  client_scope client_scope @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cl_scope_attr_scope")
+
+  @@id([scope_id, name], map: "pk_cl_tmpl_attr")
+  @@index([scope_id], map: "idx_clscope_attrs")
+}
+
+model client_scope_client {
+  client_id     String       @db.VarChar(36)
+  scope_id      String       @db.VarChar(36)
+  default_scope Boolean      @default(false)
+  client        client       @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_c_cli_scope_client")
+  client_scope  client_scope @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_c_cli_scope_scope")
+
+  @@id([client_id, scope_id], map: "c_cli_scope_bind")
+  @@index([scope_id], map: "idx_cl_clscope")
+  @@index([client_id], map: "idx_clscope_cl")
+}
+
+model client_scope_role_mapping {
+  scope_id     String       @db.VarChar(36)
+  role_id      String       @db.VarChar(36)
+  client_scope client_scope @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cl_scope_rm_scope")
+
+  @@id([scope_id, role_id], map: "pk_template_scope")
+  @@index([scope_id], map: "idx_clscope_role")
+  @@index([role_id], map: "idx_role_clscope")
+}
+
+model client_session {
+  id                         String                       @id(map: "constraint_8") @db.VarChar(36)
+  client_id                  String?                      @db.VarChar(36)
+  redirect_uri               String?                      @db.VarChar(255)
+  state                      String?                      @db.VarChar(255)
+  timestamp                  Int?
+  session_id                 String?                      @db.VarChar(36)
+  auth_method                String?                      @db.VarChar(255)
+  realm_id                   String?                      @db.VarChar(255)
+  auth_user_id               String?                      @db.VarChar(36)
+  current_action             String?                      @db.VarChar(36)
+  user_session               user_session?                @relation(fields: [session_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_b4ao2vcvat6ukau74wbwtfqo1")
+  client_session_auth_status client_session_auth_status[]
+  client_session_note        client_session_note[]
+  client_session_prot_mapper client_session_prot_mapper[]
+  client_session_role        client_session_role[]
+  client_user_session_note   client_user_session_note[]
+
+  @@index([session_id], map: "idx_client_session_session")
+}
+
+model client_session_auth_status {
+  authenticator                                             String         @db.VarChar(36)
+  status                                                    Int?
+  client_session                                            String         @db.VarChar(36)
+  client_session_client_sessionToclient_session_auth_status client_session @relation(fields: [client_session], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_status_constraint")
+
+  @@id([client_session, authenticator], map: "constraint_auth_status_pk")
+}
+
+model client_session_note {
+  name                                               String         @db.VarChar(255)
+  value                                              String?        @db.VarChar(255)
+  client_session                                     String         @db.VarChar(36)
+  client_session_client_sessionToclient_session_note client_session @relation(fields: [client_session], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk5edfb00ff51c2736")
+
+  @@id([client_session, name], map: "constraint_5e")
+}
+
+model client_session_prot_mapper {
+  protocol_mapper_id                                        String         @db.VarChar(36)
+  client_session                                            String         @db.VarChar(36)
+  client_session_client_sessionToclient_session_prot_mapper client_session @relation(fields: [client_session], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_33a8sgqw18i532811v7o2dk89")
+
+  @@id([client_session, protocol_mapper_id], map: "constraint_cs_pmp_pk")
+}
+
+model client_session_role {
+  role_id                                            String         @db.VarChar(255)
+  client_session                                     String         @db.VarChar(36)
+  client_session_client_sessionToclient_session_role client_session @relation(fields: [client_session], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_11b7sgqw18i532811v7o2dv76")
+
+  @@id([client_session, role_id], map: "constraint_5")
+}
+
+model client_user_session_note {
+  name                                                    String         @db.VarChar(255)
+  value                                                   String?        @db.VarChar(2048)
+  client_session                                          String         @db.VarChar(36)
+  client_session_client_sessionToclient_user_session_note client_session @relation(fields: [client_session], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cl_usr_ses_note")
+
+  @@id([client_session, name], map: "constr_cl_usr_ses_note")
+}
+
+model component {
+  id               String             @id(map: "constr_component_pk") @db.VarChar(36)
+  name             String?            @db.VarChar(255)
+  parent_id        String?            @db.VarChar(36)
+  provider_id      String?            @db.VarChar(36)
+  provider_type    String?            @db.VarChar(255)
+  realm_id         String?            @db.VarChar(36)
+  sub_type         String?            @db.VarChar(255)
+  realm            realm?             @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_component_realm")
+  component_config component_config[]
+
+  @@index([provider_type], map: "idx_component_provider_type")
+  @@index([realm_id], map: "idx_component_realm")
+}
+
+model component_config {
+  id           String    @id(map: "constr_component_config_pk") @db.VarChar(36)
+  component_id String    @db.VarChar(36)
+  name         String    @db.VarChar(255)
+  value        String?   @db.VarChar(4000)
+  component    component @relation(fields: [component_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_component_config")
+
+  @@index([component_id], map: "idx_compo_config_compo")
+}
+
+model composite_role {
+  composite                                              String        @db.VarChar(36)
+  child_role                                             String        @db.VarChar(36)
+  keycloak_role_composite_role_compositeTokeycloak_role  keycloak_role @relation("composite_role_compositeTokeycloak_role", fields: [composite], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_a63wvekftu8jo1pnj81e7mce2")
+  keycloak_role_composite_role_child_roleTokeycloak_role keycloak_role @relation("composite_role_child_roleTokeycloak_role", fields: [child_role], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_gr7thllb9lu8q4vqa4524jjy8")
+
+  @@id([composite, child_role], map: "constraint_composite_role")
+  @@index([composite], map: "idx_composite")
+  @@index([child_role], map: "idx_composite_child")
+}
+
+model credential {
+  id              String       @id(map: "constraint_f") @db.VarChar(36)
+  salt            Bytes?
+  type            String?      @db.VarChar(255)
+  user_id         String?      @db.VarChar(36)
+  created_date    BigInt?
+  user_label      String?      @db.VarChar(255)
+  secret_data     String?
+  credential_data String?
+  priority        Int?
+  user_entity     user_entity? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pfyr0glasqyl0dei3kl69r6v0")
+
+  @@index([user_id], map: "idx_user_credential")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model databasechangelog {
+  id            String   @db.VarChar(255)
+  author        String   @db.VarChar(255)
+  filename      String   @db.VarChar(255)
+  dateexecuted  DateTime @db.Timestamp(6)
+  orderexecuted Int
+  exectype      String   @db.VarChar(10)
+  md5sum        String?  @db.VarChar(35)
+  description   String?  @db.VarChar(255)
+  comments      String?  @db.VarChar(255)
+  tag           String?  @db.VarChar(255)
+  liquibase     String?  @db.VarChar(20)
+  contexts      String?  @db.VarChar(255)
+  labels        String?  @db.VarChar(255)
+  deployment_id String?  @db.VarChar(10)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model databasechangelog_abinitio_e {
+  id            String   @db.VarChar(255)
+  author        String   @db.VarChar(255)
+  filename      String   @db.VarChar(255)
+  dateexecuted  DateTime @db.Timestamp(6)
+  orderexecuted Int
+  exectype      String   @db.VarChar(10)
+  md5sum        String?  @db.VarChar(35)
+  description   String?  @db.VarChar(255)
+  comments      String?  @db.VarChar(255)
+  tag           String?  @db.VarChar(255)
+  liquibase     String?  @db.VarChar(20)
+  contexts      String?  @db.VarChar(255)
+  labels        String?  @db.VarChar(255)
+  deployment_id String?  @db.VarChar(10)
+
+  @@ignore
+}
+
+model databasechangeloglock {
+  id          Int       @id(map: "pk_databasechangeloglock")
+  locked      Boolean
+  lockgranted DateTime? @db.Timestamp(6)
+  lockedby    String?   @db.VarChar(255)
+}
+
+model default_client_scope {
+  realm_id      String       @db.VarChar(36)
+  scope_id      String       @db.VarChar(36)
+  default_scope Boolean      @default(false)
+  realm         realm        @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_r_def_cli_scope_realm")
+  client_scope  client_scope @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_r_def_cli_scope_scope")
+
+  @@id([realm_id, scope_id], map: "r_def_cli_scope_bind")
+  @@index([realm_id], map: "idx_defcls_realm")
+  @@index([scope_id], map: "idx_defcls_scope")
+}
+
+model event_entity {
+  id           String  @id(map: "constraint_4") @db.VarChar(36)
+  client_id    String? @db.VarChar(255)
+  details_json String? @db.VarChar(2550)
+  error        String? @db.VarChar(255)
+  ip_address   String? @db.VarChar(255)
+  realm_id     String? @db.VarChar(255)
+  session_id   String? @db.VarChar(255)
+  event_time   BigInt?
+  type         String? @db.VarChar(255)
+  user_id      String? @db.VarChar(255)
+
+  @@index([realm_id, event_time], map: "idx_event_time")
+}
+
+model fed_user_attribute {
+  id                  String  @id(map: "constr_fed_user_attr_pk") @db.VarChar(36)
+  name                String  @db.VarChar(255)
+  user_id             String  @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+  storage_provider_id String? @db.VarChar(36)
+  value               String? @db.VarChar(2024)
+
+  @@index([user_id, realm_id, name], map: "idx_fu_attribute")
+}
+
+model fed_user_consent {
+  id                      String  @id(map: "constr_fed_user_consent_pk") @db.VarChar(36)
+  client_id               String? @db.VarChar(255)
+  user_id                 String  @db.VarChar(255)
+  realm_id                String  @db.VarChar(36)
+  storage_provider_id     String? @db.VarChar(36)
+  created_date            BigInt?
+  last_updated_date       BigInt?
+  client_storage_provider String? @db.VarChar(36)
+  external_client_id      String? @db.VarChar(255)
+
+  @@index([user_id, client_storage_provider, external_client_id], map: "idx_fu_cnsnt_ext")
+  @@index([user_id, client_id], map: "idx_fu_consent")
+  @@index([realm_id, user_id], map: "idx_fu_consent_ru")
+}
+
+model fed_user_consent_cl_scope {
+  user_consent_id String @db.VarChar(36)
+  scope_id        String @db.VarChar(36)
+
+  @@id([user_consent_id, scope_id], map: "constraint_fgrntcsnt_clsc_pm")
+}
+
+model fed_user_credential {
+  id                  String  @id(map: "constr_fed_user_cred_pk") @db.VarChar(36)
+  salt                Bytes?
+  type                String? @db.VarChar(255)
+  created_date        BigInt?
+  user_id             String  @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+  storage_provider_id String? @db.VarChar(36)
+  user_label          String? @db.VarChar(255)
+  secret_data         String?
+  credential_data     String?
+  priority            Int?
+
+  @@index([user_id, type], map: "idx_fu_credential")
+  @@index([realm_id, user_id], map: "idx_fu_credential_ru")
+}
+
+model fed_user_group_membership {
+  group_id            String  @db.VarChar(36)
+  user_id             String  @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+  storage_provider_id String? @db.VarChar(36)
+
+  @@id([group_id, user_id], map: "constr_fed_user_group")
+  @@index([user_id, group_id], map: "idx_fu_group_membership")
+  @@index([realm_id, user_id], map: "idx_fu_group_membership_ru")
+}
+
+model fed_user_required_action {
+  required_action     String  @default(" ") @db.VarChar(255)
+  user_id             String  @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+  storage_provider_id String? @db.VarChar(36)
+
+  @@id([required_action, user_id], map: "constr_fed_required_action")
+  @@index([user_id, required_action], map: "idx_fu_required_action")
+  @@index([realm_id, user_id], map: "idx_fu_required_action_ru")
+}
+
+model fed_user_role_mapping {
+  role_id             String  @db.VarChar(36)
+  user_id             String  @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+  storage_provider_id String? @db.VarChar(36)
+
+  @@id([role_id, user_id], map: "constr_fed_user_role")
+  @@index([user_id, role_id], map: "idx_fu_role_mapping")
+  @@index([realm_id, user_id], map: "idx_fu_role_mapping_ru")
+}
+
+model federated_identity {
+  identity_provider  String      @db.VarChar(255)
+  realm_id           String?     @db.VarChar(36)
+  federated_user_id  String?     @db.VarChar(255)
+  federated_username String?     @db.VarChar(255)
+  token              String?
+  user_id            String      @db.VarChar(36)
+  user_entity        user_entity @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk404288b92ef007a6")
+
+  @@id([identity_provider, user_id], map: "constraint_40")
+  @@index([federated_user_id], map: "idx_fedidentity_feduser")
+  @@index([user_id], map: "idx_fedidentity_user")
+}
+
+model federated_user {
+  id                  String  @id(map: "constr_federated_user") @db.VarChar(255)
+  storage_provider_id String? @db.VarChar(255)
+  realm_id            String  @db.VarChar(36)
+}
+
+model group_attribute {
+  id             String         @id(map: "constraint_group_attribute_pk") @default("sybase-needs-something-here") @db.VarChar(36)
+  name           String         @db.VarChar(255)
+  value          String?        @db.VarChar(255)
+  group_id       String         @db.VarChar(36)
+  keycloak_group keycloak_group @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_group_attribute_group")
+
+  @@index([group_id], map: "idx_group_attr_group")
+}
+
+model group_role_mapping {
+  role_id        String         @db.VarChar(36)
+  group_id       String         @db.VarChar(36)
+  keycloak_group keycloak_group @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_group_role_group")
+
+  @@id([role_id, group_id], map: "constraint_group_role")
+  @@index([group_id], map: "idx_group_role_mapp_group")
+}
+
+model identity_provider {
+  internal_id                String                     @id(map: "constraint_2b") @db.VarChar(36)
+  enabled                    Boolean                    @default(false)
+  provider_alias             String?                    @db.VarChar(255)
+  provider_id                String?                    @db.VarChar(255)
+  store_token                Boolean                    @default(false)
+  authenticate_by_default    Boolean                    @default(false)
+  realm_id                   String?                    @db.VarChar(36)
+  add_token_role             Boolean                    @default(true)
+  trust_email                Boolean                    @default(false)
+  first_broker_login_flow_id String?                    @db.VarChar(36)
+  post_broker_login_flow_id  String?                    @db.VarChar(36)
+  provider_display_name      String?                    @db.VarChar(255)
+  link_only                  Boolean                    @default(false)
+  realm                      realm?                     @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk2b4ebc52ae5c3b34")
+  identity_provider_config   identity_provider_config[]
+
+  @@unique([provider_alias, realm_id], map: "uk_2daelwnibji49avxsrtuf6xj33")
+  @@index([realm_id], map: "idx_ident_prov_realm")
+}
+
+model identity_provider_config {
+  identity_provider_id String            @db.VarChar(36)
+  value                String?
+  name                 String            @db.VarChar(255)
+  identity_provider    identity_provider @relation(fields: [identity_provider_id], references: [internal_id], onDelete: NoAction, onUpdate: NoAction, map: "fkdc4897cf864c4e43")
+
+  @@id([identity_provider_id, name], map: "constraint_d")
+}
+
+model identity_provider_mapper {
+  id                String              @id(map: "constraint_idpm") @db.VarChar(36)
+  name              String              @db.VarChar(255)
+  idp_alias         String              @db.VarChar(255)
+  idp_mapper_name   String              @db.VarChar(255)
+  realm_id          String              @db.VarChar(36)
+  realm             realm               @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_idpm_realm")
+  idp_mapper_config idp_mapper_config[]
+
+  @@index([realm_id], map: "idx_id_prov_mapp_realm")
+}
+
+model idp_mapper_config {
+  idp_mapper_id            String                   @db.VarChar(36)
+  value                    String?
+  name                     String                   @db.VarChar(255)
+  identity_provider_mapper identity_provider_mapper @relation(fields: [idp_mapper_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_idpmconfig")
+
+  @@id([idp_mapper_id, name], map: "constraint_idpmconfig")
+}
+
+model keycloak_group {
+  id                 String               @id(map: "constraint_group") @db.VarChar(36)
+  name               String?              @db.VarChar(255)
+  parent_group       String               @db.VarChar(36)
+  realm_id           String?              @db.VarChar(36)
+  realm              realm?               @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_group_realm")
+  ab_camp_user       ab_camp_user[]
+  group_attribute    group_attribute[]
+  group_role_mapping group_role_mapping[]
+
+  @@unique([realm_id, parent_group, name], map: "sibling_names")
+}
+
+model keycloak_role {
+  id                                                      String           @id(map: "constraint_a") @db.VarChar(36)
+  client_realm_constraint                                 String?          @db.VarChar(255)
+  client_role                                             Boolean          @default(false)
+  description                                             String?          @db.VarChar(255)
+  name                                                    String?          @db.VarChar(255)
+  realm_id                                                String?          @db.VarChar(255)
+  client                                                  String?          @db.VarChar(36)
+  realm                                                   String?          @db.VarChar(36)
+  realm_keycloak_roleTorealm                              realm?           @relation(fields: [realm], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_6vyqfe4cn4wlq8r6kt5vdsj5c")
+  composite_role_composite_role_compositeTokeycloak_role  composite_role[] @relation("composite_role_compositeTokeycloak_role")
+  composite_role_composite_role_child_roleTokeycloak_role composite_role[] @relation("composite_role_child_roleTokeycloak_role")
+  role_attribute                                          role_attribute[]
+
+  @@unique([name, client_realm_constraint], map: "UK_J3RWUVD56ONTGSUHOGM184WW2-2")
+  @@index([client], map: "idx_keycloak_role_client")
+  @@index([realm], map: "idx_keycloak_role_realm")
+}
+
+model migration_model {
+  id          String  @id(map: "constraint_migmod") @db.VarChar(36)
+  version     String? @db.VarChar(36)
+  update_time BigInt  @default(0)
+
+  @@index([update_time], map: "idx_update_time")
+}
+
+model offline_client_session {
+  user_session_id         String  @db.VarChar(36)
+  client_id               String  @db.VarChar(255)
+  offline_flag            String  @db.VarChar(4)
+  timestamp               Int?
+  data                    String?
+  client_storage_provider String  @default("local") @db.VarChar(36)
+  external_client_id      String  @default("local") @db.VarChar(255)
+
+  @@id([user_session_id, client_id, client_storage_provider, external_client_id, offline_flag], map: "constraint_offl_cl_ses_pk3")
+  @@index([user_session_id], map: "idx_us_sess_id_on_cl_sess")
+}
+
+model offline_user_session {
+  user_session_id      String  @db.VarChar(36)
+  user_id              String  @db.VarChar(255)
+  realm_id             String  @db.VarChar(36)
+  created_on           Int
+  offline_flag         String  @db.VarChar(4)
+  data                 String?
+  last_session_refresh Int     @default(0)
+
+  @@id([user_session_id, offline_flag], map: "constraint_offl_us_ses_pk2")
+  @@index([created_on], map: "idx_offline_uss_createdon")
+}
+
+model policy_config {
+  policy_id              String                 @db.VarChar(36)
+  name                   String                 @db.VarChar(255)
+  value                  String?
+  resource_server_policy resource_server_policy @relation(fields: [policy_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkdc34197cf864c4e43")
+
+  @@id([policy_id, name], map: "constraint_dpc")
+}
+
+model protocol_mapper {
+  id                     String                   @id(map: "constraint_pcm") @db.VarChar(36)
+  name                   String                   @db.VarChar(255)
+  protocol               String                   @db.VarChar(255)
+  protocol_mapper_name   String                   @db.VarChar(255)
+  client_id              String?                  @db.VarChar(36)
+  client_scope_id        String?                  @db.VarChar(36)
+  client_scope           client_scope?            @relation(fields: [client_scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cli_scope_mapper")
+  client                 client?                  @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pcm_realm")
+  protocol_mapper_config protocol_mapper_config[]
+
+  @@index([client_scope_id], map: "idx_clscope_protmap")
+  @@index([client_id], map: "idx_protocol_mapper_client")
+}
+
+model protocol_mapper_config {
+  protocol_mapper_id String          @db.VarChar(36)
+  value              String?
+  name               String          @db.VarChar(255)
+  protocol_mapper    protocol_mapper @relation(fields: [protocol_mapper_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pmconfig")
+
+  @@id([protocol_mapper_id, name], map: "constraint_pmconfig")
+}
+
+model realm {
+  id                           String                      @id(map: "constraint_4a") @db.VarChar(36)
+  access_code_lifespan         Int?
+  user_action_lifespan         Int?
+  access_token_lifespan        Int?
+  account_theme                String?                     @db.VarChar(255)
+  admin_theme                  String?                     @db.VarChar(255)
+  email_theme                  String?                     @db.VarChar(255)
+  enabled                      Boolean                     @default(false)
+  events_enabled               Boolean                     @default(false)
+  events_expiration            BigInt?
+  login_theme                  String?                     @db.VarChar(255)
+  name                         String?                     @unique(map: "uk_orvsdmla56612eaefiq6wl5oi") @db.VarChar(255)
+  not_before                   Int?
+  password_policy              String?                     @db.VarChar(2550)
+  registration_allowed         Boolean                     @default(false)
+  remember_me                  Boolean                     @default(false)
+  reset_password_allowed       Boolean                     @default(false)
+  social                       Boolean                     @default(false)
+  ssl_required                 String?                     @db.VarChar(255)
+  sso_idle_timeout             Int?
+  sso_max_lifespan             Int?
+  update_profile_on_soc_login  Boolean                     @default(false)
+  verify_email                 Boolean                     @default(false)
+  master_admin_client          String?                     @db.VarChar(36)
+  login_lifespan               Int?
+  internationalization_enabled Boolean                     @default(false)
+  default_locale               String?                     @db.VarChar(255)
+  reg_email_as_username        Boolean                     @default(false)
+  admin_events_enabled         Boolean                     @default(false)
+  admin_events_details_enabled Boolean                     @default(false)
+  edit_username_allowed        Boolean                     @default(false)
+  otp_policy_counter           Int?                        @default(0)
+  otp_policy_window            Int?                        @default(1)
+  otp_policy_period            Int?                        @default(30)
+  otp_policy_digits            Int?                        @default(6)
+  otp_policy_alg               String?                     @default("HmacSHA1") @db.VarChar(36)
+  otp_policy_type              String?                     @default("totp") @db.VarChar(36)
+  browser_flow                 String?                     @db.VarChar(36)
+  registration_flow            String?                     @db.VarChar(36)
+  direct_grant_flow            String?                     @db.VarChar(36)
+  reset_credentials_flow       String?                     @db.VarChar(36)
+  client_auth_flow             String?                     @db.VarChar(36)
+  offline_session_idle_timeout Int?                        @default(0)
+  revoke_refresh_token         Boolean                     @default(false)
+  access_token_life_implicit   Int?                        @default(0)
+  login_with_email_allowed     Boolean                     @default(true)
+  duplicate_emails_allowed     Boolean                     @default(false)
+  docker_auth_flow             String?                     @db.VarChar(36)
+  refresh_token_max_reuse      Int?                        @default(0)
+  allow_user_managed_access    Boolean                     @default(false)
+  sso_max_lifespan_remember_me Int                         @default(0)
+  sso_idle_timeout_remember_me Int                         @default(0)
+  authentication_execution     authentication_execution[]
+  authentication_flow          authentication_flow[]
+  authenticator_config         authenticator_config[]
+  client                       client[]
+  client_initial_access        client_initial_access[]
+  client_scope                 client_scope[]
+  component                    component[]
+  default_client_scope         default_client_scope[]
+  identity_provider            identity_provider[]
+  identity_provider_mapper     identity_provider_mapper[]
+  keycloak_group               keycloak_group[]
+  keycloak_role                keycloak_role[]
+  realm_attribute              realm_attribute[]
+  realm_default_groups         realm_default_groups[]
+  realm_default_roles          realm_default_roles[]
+  realm_enabled_event_types    realm_enabled_event_types[]
+  realm_events_listeners       realm_events_listeners[]
+  realm_required_credential    realm_required_credential[]
+  realm_smtp_config            realm_smtp_config[]
+  realm_supported_locales      realm_supported_locales[]
+  required_action_provider     required_action_provider[]
+  user_federation_mapper       user_federation_mapper[]
+  user_federation_provider     user_federation_provider[]
+
+  @@index([master_admin_client], map: "idx_realm_master_adm_cli")
+}
+
+model realm_attribute {
+  name     String  @db.VarChar(255)
+  value    String? @db.VarChar(255)
+  realm_id String  @db.VarChar(36)
+  realm    realm   @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_8shxd6l3e9atqukacxgpffptw")
+
+  @@id([name, realm_id], map: "constraint_9")
+  @@index([realm_id], map: "idx_realm_attr_realm")
+}
+
+model realm_default_groups {
+  realm_id String @db.VarChar(36)
+  group_id String @unique(map: "con_group_id_def_groups") @db.VarChar(36)
+  realm    realm  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_def_groups_realm")
+
+  @@id([realm_id, group_id], map: "constr_realm_default_groups")
+  @@index([realm_id], map: "idx_realm_def_grp_realm")
+}
+
+model realm_default_roles {
+  realm_id String @db.VarChar(36)
+  role_id  String @unique(map: "uk_h4wpd7w4hsoolni3h0sw7btje") @db.VarChar(36)
+  realm    realm  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_evudb1ppw84oxfax2drs03icc")
+
+  @@id([realm_id, role_id], map: "constraint_realm_default_roles")
+  @@index([realm_id], map: "idx_realm_def_roles_realm")
+}
+
+model realm_enabled_event_types {
+  realm_id String @db.VarChar(36)
+  value    String @db.VarChar(255)
+  realm    realm  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_h846o4h0w8epx5nwedrf5y69j")
+
+  @@id([realm_id, value], map: "constr_realm_enabl_event_types")
+  @@index([realm_id], map: "idx_realm_evt_types_realm")
+}
+
+model realm_events_listeners {
+  realm_id String @db.VarChar(36)
+  value    String @db.VarChar(255)
+  realm    realm  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_h846o4h0w8epx5nxev9f5y69j")
+
+  @@id([realm_id, value], map: "constr_realm_events_listeners")
+  @@index([realm_id], map: "idx_realm_evt_list_realm")
+}
+
+model realm_localizations {
+  realm_id String @db.VarChar(255)
+  locale   String @db.VarChar(255)
+  texts    String
+
+  @@id([realm_id, locale])
+}
+
+model realm_required_credential {
+  type       String  @db.VarChar(255)
+  form_label String? @db.VarChar(255)
+  input      Boolean @default(false)
+  secret     Boolean @default(false)
+  realm_id   String  @db.VarChar(36)
+  realm      realm   @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5hg65lybevavkqfki3kponh9v")
+
+  @@id([realm_id, type], map: "constraint_92")
+}
+
+model realm_smtp_config {
+  realm_id String  @db.VarChar(36)
+  value    String? @db.VarChar(255)
+  name     String  @db.VarChar(255)
+  realm    realm   @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_70ej8xdxgxd0b9hh6180irr0o")
+
+  @@id([realm_id, name], map: "constraint_e")
+}
+
+model realm_supported_locales {
+  realm_id String @db.VarChar(36)
+  value    String @db.VarChar(255)
+  realm    realm  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_supported_locales_realm")
+
+  @@id([realm_id, value], map: "constr_realm_supported_locales")
+  @@index([realm_id], map: "idx_realm_supp_local_realm")
+}
+
+model redirect_uris {
+  client_id String @db.VarChar(36)
+  value     String @db.VarChar(255)
+  client    client @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_1burs8pb4ouj97h5wuppahv9f")
+
+  @@id([client_id, value], map: "constraint_redirect_uris")
+  @@index([client_id], map: "idx_redir_uri_client")
+}
+
+model required_action_config {
+  required_action_id String  @db.VarChar(36)
+  value              String?
+  name               String  @db.VarChar(255)
+
+  @@id([required_action_id, name], map: "constraint_req_act_cfg_pk")
+}
+
+model required_action_provider {
+  id             String  @id(map: "constraint_req_act_prv_pk") @db.VarChar(36)
+  alias          String? @db.VarChar(255)
+  name           String? @db.VarChar(255)
+  realm_id       String? @db.VarChar(36)
+  enabled        Boolean @default(false)
+  default_action Boolean @default(false)
+  provider_id    String? @db.VarChar(255)
+  priority       Int?
+  realm          realm?  @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_req_act_realm")
+
+  @@index([realm_id], map: "idx_req_act_prov_realm")
+}
+
+model resource_attribute {
+  id                       String                   @id(map: "res_attr_pk") @default("sybase-needs-something-here") @db.VarChar(36)
+  name                     String                   @db.VarChar(255)
+  value                    String?                  @db.VarChar(255)
+  resource_id              String                   @db.VarChar(36)
+  resource_server_resource resource_server_resource @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5hrm2vlf9ql5fu022kqepovbr")
+}
+
+model resource_policy {
+  resource_id              String                   @db.VarChar(36)
+  policy_id                String                   @db.VarChar(36)
+  resource_server_resource resource_server_resource @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpos53xcx4wnkog82ssrfy")
+  resource_server_policy   resource_server_policy   @relation(fields: [policy_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpp213xcx4wnkog82ssrfy")
+
+  @@id([resource_id, policy_id], map: "constraint_farsrpp")
+  @@index([policy_id], map: "idx_res_policy_policy")
+}
+
+model resource_scope {
+  resource_id              String                   @db.VarChar(36)
+  scope_id                 String                   @db.VarChar(36)
+  resource_server_resource resource_server_resource @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpos13xcx4wnkog82ssrfy")
+  resource_server_scope    resource_server_scope    @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrps213xcx4wnkog82ssrfy")
+
+  @@id([resource_id, scope_id], map: "constraint_farsrsp")
+  @@index([scope_id], map: "idx_res_scope_scope")
+}
+
+model resource_server {
+  id                          String                        @id(map: "pk_resource_server") @db.VarChar(36)
+  allow_rs_remote_mgmt        Boolean                       @default(false)
+  policy_enforce_mode         String                        @db.VarChar(15)
+  decision_strategy           Int                           @default(1) @db.SmallInt
+  resource_server_perm_ticket resource_server_perm_ticket[]
+  resource_server_policy      resource_server_policy[]
+  resource_server_resource    resource_server_resource[]
+  resource_server_scope       resource_server_scope[]
+}
+
+model resource_server_perm_ticket {
+  id                       String                   @id(map: "constraint_fapmt") @db.VarChar(36)
+  owner                    String                   @db.VarChar(255)
+  requester                String                   @db.VarChar(255)
+  created_timestamp        BigInt
+  granted_timestamp        BigInt?
+  resource_id              String                   @db.VarChar(36)
+  scope_id                 String?                  @db.VarChar(36)
+  resource_server_id       String                   @db.VarChar(36)
+  policy_id                String?                  @db.VarChar(36)
+  resource_server          resource_server          @relation(fields: [resource_server_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrho213xcx4wnkog82sspmt")
+  resource_server_resource resource_server_resource @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrho213xcx4wnkog83sspmt")
+  resource_server_scope    resource_server_scope?   @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrho213xcx4wnkog84sspmt")
+  resource_server_policy   resource_server_policy?  @relation(fields: [policy_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpo2128cx4wnkog82ssrfy")
+
+  @@unique([owner, requester, resource_server_id, resource_id, scope_id], map: "uk_frsr6t700s9v50bu18ws5pmt")
+}
+
+model resource_server_policy {
+  id                                                                               String                        @id(map: "constraint_farsrp") @db.VarChar(36)
+  name                                                                             String                        @db.VarChar(255)
+  description                                                                      String?                       @db.VarChar(255)
+  type                                                                             String                        @db.VarChar(255)
+  decision_strategy                                                                String?                       @db.VarChar(20)
+  logic                                                                            String?                       @db.VarChar(20)
+  resource_server_id                                                               String                        @db.VarChar(36)
+  owner                                                                            String?                       @db.VarChar(255)
+  resource_server                                                                  resource_server               @relation(fields: [resource_server_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpo213xcx4wnkog82ssrfy")
+  associated_policy_associated_policy_associated_policy_idToresource_server_policy associated_policy[]           @relation("associated_policy_associated_policy_idToresource_server_policy")
+  associated_policy_associated_policy_policy_idToresource_server_policy            associated_policy[]           @relation("associated_policy_policy_idToresource_server_policy")
+  policy_config                                                                    policy_config[]
+  resource_policy                                                                  resource_policy[]
+  resource_server_perm_ticket                                                      resource_server_perm_ticket[]
+  scope_policy                                                                     scope_policy[]
+
+  @@unique([name, resource_server_id], map: "uk_frsrpt700s9v50bu18ws5ha6")
+  @@index([resource_server_id], map: "idx_res_serv_pol_res_serv")
+}
+
+model resource_server_resource {
+  id                          String                        @id(map: "constraint_farsr") @db.VarChar(36)
+  name                        String                        @db.VarChar(255)
+  type                        String?                       @db.VarChar(255)
+  icon_uri                    String?                       @db.VarChar(255)
+  owner                       String                        @db.VarChar(255)
+  resource_server_id          String                        @db.VarChar(36)
+  owner_managed_access        Boolean                       @default(false)
+  display_name                String?                       @db.VarChar(255)
+  resource_server             resource_server               @relation(fields: [resource_server_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrho213xcx4wnkog82ssrfy")
+  resource_attribute          resource_attribute[]
+  resource_policy             resource_policy[]
+  resource_scope              resource_scope[]
+  resource_server_perm_ticket resource_server_perm_ticket[]
+  resource_uris               resource_uris[]
+
+  @@unique([name, owner, resource_server_id], map: "uk_frsr6t700s9v50bu18ws5ha6")
+  @@index([resource_server_id], map: "idx_res_srv_res_res_srv")
+}
+
+model resource_server_scope {
+  id                          String                        @id(map: "constraint_farsrs") @db.VarChar(36)
+  name                        String                        @db.VarChar(255)
+  icon_uri                    String?                       @db.VarChar(255)
+  resource_server_id          String                        @db.VarChar(36)
+  display_name                String?                       @db.VarChar(255)
+  resource_server             resource_server               @relation(fields: [resource_server_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrso213xcx4wnkog82ssrfy")
+  resource_scope              resource_scope[]
+  resource_server_perm_ticket resource_server_perm_ticket[]
+  scope_policy                scope_policy[]
+
+  @@unique([name, resource_server_id], map: "uk_frsrst700s9v50bu18ws5ha6")
+  @@index([resource_server_id], map: "idx_res_srv_scope_res_srv")
+}
+
+model resource_uris {
+  resource_id              String                   @db.VarChar(36)
+  value                    String                   @db.VarChar(255)
+  resource_server_resource resource_server_resource @relation(fields: [resource_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_resource_server_uris")
+
+  @@id([resource_id, value], map: "constraint_resour_uris_pk")
+}
+
+model role_attribute {
+  id            String        @id(map: "constraint_role_attribute_pk") @db.VarChar(36)
+  role_id       String        @db.VarChar(36)
+  name          String        @db.VarChar(255)
+  value         String?       @db.VarChar(255)
+  keycloak_role keycloak_role @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_role_attribute_id")
+
+  @@index([role_id], map: "idx_role_attribute")
+}
+
+model scope_mapping {
+  client_id String @db.VarChar(36)
+  role_id   String @db.VarChar(36)
+  client    client @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ouse064plmlr732lxjcn1q5f1")
+
+  @@id([client_id, role_id], map: "constraint_81")
+  @@index([role_id], map: "idx_scope_mapping_role")
+}
+
+model scope_policy {
+  scope_id               String                 @db.VarChar(36)
+  policy_id              String                 @db.VarChar(36)
+  resource_server_policy resource_server_policy @relation(fields: [policy_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrasp13xcx4wnkog82ssrfy")
+  resource_server_scope  resource_server_scope  @relation(fields: [scope_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_frsrpass3xcx4wnkog82ssrfy")
+
+  @@id([scope_id, policy_id], map: "constraint_farsrsps")
+  @@index([policy_id], map: "idx_scope_policy_policy")
+}
+
+model user_attribute {
+  name        String      @db.VarChar(255)
+  value       String?     @db.VarChar(255)
+  user_id     String      @db.VarChar(36)
+  id          String      @id(map: "constraint_user_attribute_pk") @default("sybase-needs-something-here") @db.VarChar(36)
+  user_entity user_entity @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_5hrm2vlf9ql5fu043kqepovbr")
+
+  @@index([user_id], map: "idx_user_attribute")
+}
+
+model user_consent {
+  id                        String                      @id(map: "constraint_grntcsnt_pm") @db.VarChar(36)
+  client_id                 String?                     @db.VarChar(255)
+  user_id                   String                      @db.VarChar(36)
+  created_date              BigInt?
+  last_updated_date         BigInt?
+  client_storage_provider   String?                     @db.VarChar(36)
+  external_client_id        String?                     @db.VarChar(255)
+  user_entity               user_entity                 @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_grntcsnt_user")
+  user_consent_client_scope user_consent_client_scope[]
+
+  @@unique([client_id, client_storage_provider, external_client_id, user_id], map: "uk_jkuwuvd56ontgsuhogm8uewrt")
+  @@index([user_id], map: "idx_user_consent")
+}
+
+model user_consent_client_scope {
+  user_consent_id String       @db.VarChar(36)
+  scope_id        String       @db.VarChar(36)
+  user_consent    user_consent @relation(fields: [user_consent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_grntcsnt_clsc_usc")
+
+  @@id([user_consent_id, scope_id], map: "constraint_grntcsnt_clsc_pm")
+  @@index([user_consent_id], map: "idx_usconsent_clscope")
+}
+
+model user_entity {
+  id                          String                  @id(map: "constraint_fb") @db.VarChar(36)
+  email                       String?                 @db.VarChar(255)
+  email_constraint            String?                 @db.VarChar(255)
+  email_verified              Boolean                 @default(false)
+  enabled                     Boolean                 @default(false)
+  federation_link             String?                 @db.VarChar(255)
+  first_name                  String?                 @db.VarChar(255)
+  last_name                   String?                 @db.VarChar(255)
+  realm_id                    String?                 @db.VarChar(255)
+  username                    String?                 @db.VarChar(255)
+  created_timestamp           BigInt?
+  service_account_client_link String?                 @db.VarChar(255)
+  not_before                  Int                     @default(0)
+  ab_camp_user                ab_camp_user?
+  credential                  credential[]
+  federated_identity          federated_identity[]
+  user_attribute              user_attribute[]
+  user_consent                user_consent[]
+  user_group_membership       user_group_membership[]
+  user_required_action        user_required_action[]
+  user_role_mapping           user_role_mapping[]
+
+  @@unique([realm_id, email_constraint], map: "uk_dykn684sl8up1crfei6eckhd7")
+  @@unique([realm_id, username], map: "uk_ru8tt6t700s9v50bu18ws5ha6")
+  @@index([email], map: "idx_user_email")
+}
+
+model user_federation_config {
+  user_federation_provider_id String                   @db.VarChar(36)
+  value                       String?                  @db.VarChar(255)
+  name                        String                   @db.VarChar(255)
+  user_federation_provider    user_federation_provider @relation(fields: [user_federation_provider_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_t13hpu1j94r2ebpekr39x5eu5")
+
+  @@id([user_federation_provider_id, name], map: "constraint_f9")
+}
+
+model user_federation_mapper {
+  id                            String                          @id(map: "constraint_fedmapperpm") @db.VarChar(36)
+  name                          String                          @db.VarChar(255)
+  federation_provider_id        String                          @db.VarChar(36)
+  federation_mapper_type        String                          @db.VarChar(255)
+  realm_id                      String                          @db.VarChar(36)
+  user_federation_provider      user_federation_provider        @relation(fields: [federation_provider_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fedmapperpm_fedprv")
+  realm                         realm                           @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fedmapperpm_realm")
+  user_federation_mapper_config user_federation_mapper_config[]
+
+  @@index([federation_provider_id], map: "idx_usr_fed_map_fed_prv")
+  @@index([realm_id], map: "idx_usr_fed_map_realm")
+}
+
+model user_federation_mapper_config {
+  user_federation_mapper_id String                 @db.VarChar(36)
+  value                     String?                @db.VarChar(255)
+  name                      String                 @db.VarChar(255)
+  user_federation_mapper    user_federation_mapper @relation(fields: [user_federation_mapper_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_fedmapper_cfg")
+
+  @@id([user_federation_mapper_id, name], map: "constraint_fedmapper_cfg_pm")
+}
+
+model user_federation_provider {
+  id                     String                   @id(map: "constraint_5c") @db.VarChar(36)
+  changed_sync_period    Int?
+  display_name           String?                  @db.VarChar(255)
+  full_sync_period       Int?
+  last_sync              Int?
+  priority               Int?
+  provider_name          String?                  @db.VarChar(255)
+  realm_id               String?                  @db.VarChar(36)
+  realm                  realm?                   @relation(fields: [realm_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_1fj32f6ptolw2qy60cd8n01e8")
+  user_federation_config user_federation_config[]
+  user_federation_mapper user_federation_mapper[]
+
+  @@index([realm_id], map: "idx_usr_fed_prv_realm")
+}
+
+model user_group_membership {
+  group_id    String      @db.VarChar(36)
+  user_id     String      @db.VarChar(36)
+  user_entity user_entity @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_group_user")
+
+  @@id([group_id, user_id], map: "constraint_user_group")
+  @@index([user_id], map: "idx_user_group_mapping")
+}
+
+model user_required_action {
+  user_id         String      @db.VarChar(36)
+  required_action String      @default(" ") @db.VarChar(255)
+  user_entity     user_entity @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_6qj3w1jw9cvafhe19bwsiuvmd")
+
+  @@id([required_action, user_id], map: "constraint_required_action")
+  @@index([user_id], map: "idx_user_reqactions")
+}
+
+model user_role_mapping {
+  role_id     String      @db.VarChar(255)
+  user_id     String      @db.VarChar(36)
+  user_entity user_entity @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_c4fqv34p1mbylloxang7b1q3l")
+
+  @@id([role_id, user_id], map: "constraint_c")
+  @@index([user_id], map: "idx_user_role_mapping")
+}
+
+model user_session {
+  id                   String              @id(map: "constraint_57") @db.VarChar(36)
+  auth_method          String?             @db.VarChar(255)
+  ip_address           String?             @db.VarChar(255)
+  last_session_refresh Int?
+  login_username       String?             @db.VarChar(255)
+  realm_id             String?             @db.VarChar(255)
+  remember_me          Boolean             @default(false)
+  started              Int?
+  user_id              String?             @db.VarChar(255)
+  user_session_state   Int?
+  broker_session_id    String?             @db.VarChar(255)
+  broker_user_id       String?             @db.VarChar(255)
+  client_session       client_session[]
+  user_session_note    user_session_note[]
+}
+
+model user_session_note {
+  user_session                                 String       @db.VarChar(36)
+  name                                         String       @db.VarChar(255)
+  value                                        String?      @db.VarChar(2048)
+  user_session_user_sessionTouser_session_note user_session @relation(fields: [user_session], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk5edfb00ff51d3472")
+
+  @@id([user_session, name], map: "constraint_usn_pk")
+}
+
+model username_login_failure {
+  realm_id                String  @db.VarChar(36)
+  username                String  @db.VarChar(255)
+  failed_login_not_before Int?
+  last_failure            BigInt?
+  last_ip_failure         String? @db.VarChar(255)
+  num_failures            Int?
+
+  @@id([realm_id, username], map: "CONSTRAINT_17-2")
+}
+
+model web_origins {
+  client_id String @db.VarChar(36)
+  value     String @db.VarChar(255)
+  client    client @relation(fields: [client_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lojpho213xcx4wnkog82ssrfy")
+
+  @@id([client_id, value], map: "constraint_web_origins")
+  @@index([client_id], map: "idx_web_orig_client")
+}
+
+model ab_camp_user {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String          @unique(map: "ab_camp_user_user_id_unique") @db.VarChar(36)
+  tokens         Int?            @default(0)
+  gatekeeper_for String?         @db.VarChar(36)
+  created_at     DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime        @default(now()) @db.Timestamptz(6)
+  keycloak_group keycloak_group? @relation(fields: [gatekeeper_for], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ab_camp_user_gatekeeper_for_foreign")
+  user_entity    user_entity     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ab_camp_user_user_id_foreign")
+
+  @@unique([id, user_id], map: "ab_camp_user_id_user_id_unique")
+}
+
+model ab_training_env {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  course_name    String       @db.VarChar(255)
+  user_id        String       @db.VarChar(36)
+  job_id         String?      @unique(map: "ab_training_env_job_id_unique") @db.VarChar(255)
+  product_id     String?      @db.VarChar(255)
+  status         status_type?
+  status_message String?
+  started_at     DateTime?    @db.Timestamptz(6)
+  completed_at   DateTime?    @db.Timestamptz(6)
+  deleted        Boolean?     @default(false)
+  customer_id    String?      @db.VarChar(36)
+  instance_id    String?      @unique(map: "ab_training_env_instance_id_unique") @db.VarChar(255)
+  instance_url   String?      @db.VarChar(255)
+  region         String?      @db.VarChar(255)
+  expires_in     Int?         @default(7)
+  password       String?      @db.VarChar(255)
+  log_stream     String?      @db.VarChar(255)
+  term           String?      @db.VarChar(255)
+  urls           Json?
+}
+
+model knex_migrations {
+  id             Int       @id @default(autoincrement())
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @db.Timestamptz(6)
+}
+
+model knex_migrations_lock {
+  index     Int  @id @default(autoincrement())
+  is_locked Int?
+}
+
+model ab_camp_audit {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+  user_id      String?  @db.VarChar(36)
+  operation_id String   @db.VarChar(255)
+  auditable_id String?  @db.VarChar(36)
+  details      Json?
+}
+
+enum status_type {
+  CONFIGURING
+  READY
+  REQUESTED
+  PENDING
+  IN_PROGRESS
+  STOPPING
+  TERMINATED
+  ERROR
+  ERROR_DURING_DELETE
+}
+
+model ab_camp_audit_operation {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  name       String   @db.VarChar(255)
+}
+
+model ab_camp_audit_operation_type {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  name       String   @db.VarChar(255)
+}
+
+model base_url {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  url        String   @db.VarChar(255)
+}
+
+model base_url_ab_camp_user {
+  base_url_id     String   @id @db.VarChar(36)
+  ab_camp_user_id String
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user2 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user3 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user4 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user5 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user6 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user7 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user8 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_camp_user9 {
+  ab_camp_user_id  String   @id @db.VarChar(36)
+  ab_camp_user_id2 String   @db.VarChar(36)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user2 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user3 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user4 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user5 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user6 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user7 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user8 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user9 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user10 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user11 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user12 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user13 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user14 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user15 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user16 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user17 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user18 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user19 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user20 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user21 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user22 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user23 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user24 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user25 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user26 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user27 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user28 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user29 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user30 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user31 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user32 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user33 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user34 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user35 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user36 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user37 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user38 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user39 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user40 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user41 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user42 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user43 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user44 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user45 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user46 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user47 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_camp_user48 {
+  ab_training_env_id String   @id @db.VarChar(36)
+  ab_camp_user_id    String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env2 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env3 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env4 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env5 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env6 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env7 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env8 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env9 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env10 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env11 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env12 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env13 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env14 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env2 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env3 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env4 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env5 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env6 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env7 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env8 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env9 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env10 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env11 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env12 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env13 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_training_env_ab_training_env14 {
+  ab_training_env_id  String   @id @db.VarChar(36)
+  ab_training_env_id2 String   @db.VarChar(36)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env1 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env33 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env34 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env35 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env36 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env37 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env38 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env39 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env40 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env41 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env42 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env43 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env44 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env45 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env46 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env47 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env48 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env49 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env50 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env51 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env52 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env53 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env54 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env55 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env56 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env57 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env58 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env59 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ab_camp_user_ab_training_env60 {
+  ab_camp_user_id    String   @id @db.VarChar(36)
+  ab_training_env_id String   @db.VarChar(36)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+}
+
+enum SchedulingType {
+  ROUND_ROBIN @map("roundRobin")
+  COLLECTIVE  @map("collective")
+  MANAGED     @map("managed")
+}
+
+enum PeriodType {
+  UNLIMITED @map("unlimited")
+  ROLLING   @map("rolling")
+  RANGE     @map("range")
+}
+
+model Host {
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  eventTypeId Int
+  isFixed     Boolean   @default(false)
+
+  @@id([userId, eventTypeId])
+  @@index([userId])
+  @@index([eventTypeId])
+}
+
+model EventType {
+  id                              Int                     @id @default(autoincrement())
+  /// @zod.min(1)
+  title                           String
+  /// @zod.custom(imports.eventTypeSlug)
+  slug                            String
+  description                     String?
+  position                        Int                     @default(0)
+  /// @zod.custom(imports.eventTypeLocations)
+  locations                       Json?
+  /// @zod.min(1)
+  length                          Int
+  offsetStart                     Int                     @default(0)
+  hidden                          Boolean                 @default(false)
+  hosts                           Host[]
+  users                           User[]                  @relation("user_eventtype")
+  owner                           User?                   @relation("owner", fields: [userId], references: [id], onDelete: Cascade)
+  userId                          Int?
+  team                            Team?                   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId                          Int?
+  hashedLink                      HashedLink?
+  bookings                        Booking[]
+  availability                    Availability[]
+  webhooks                        Webhook[]
+  destinationCalendar             DestinationCalendar?
+  eventName                       String?
+  customInputs                    EventTypeCustomInput[]
+  parentId                        Int?
+  parent                          EventType?              @relation("managed_eventtype", fields: [parentId], references: [id], onDelete: Cascade)
+  children                        EventType[]             @relation("managed_eventtype")
+  /// @zod.custom(imports.eventTypeBookingFields)
+  bookingFields                   Json?
+  timeZone                        String?
+  periodType                      PeriodType              @default(UNLIMITED)
+  /// @zod.custom(imports.coerceToDate)
+  periodStartDate                 DateTime?
+  /// @zod.custom(imports.coerceToDate)
+  periodEndDate                   DateTime?
+  periodDays                      Int?
+  periodCountCalendarDays         Boolean?
+  requiresConfirmation            Boolean                 @default(false)
+  requiresBookerEmailVerification Boolean                 @default(false)
+  /// @zod.custom(imports.recurringEventType)
+  recurringEvent                  Json?
+  disableGuests                   Boolean                 @default(false)
+  hideCalendarNotes               Boolean                 @default(false)
+  /// @zod.min(0)
+  minimumBookingNotice            Int                     @default(120)
+  beforeEventBuffer               Int                     @default(0)
+  afterEventBuffer                Int                     @default(0)
+  seatsPerTimeSlot                Int?
+  seatsShowAttendees              Boolean?                @default(false)
+  seatsShowAvailabilityCount      Boolean?                @default(true)
+  schedulingType                  SchedulingType?
+  schedule                        Schedule?               @relation(fields: [scheduleId], references: [id])
+  scheduleId                      Int?
+  // price is deprecated. It has now moved to metadata.apps.stripe.price. Plan to drop this column.
+  price                           Int                     @default(0)
+  // currency is deprecated. It has now moved to metadata.apps.stripe.currency. Plan to drop this column.
+  currency                        String                  @default("usd")
+  slotInterval                    Int?
+  /// @zod.custom(imports.EventTypeMetaDataSchema)
+  metadata                        Json?
+  /// @zod.custom(imports.successRedirectUrl)
+  successRedirectUrl              String?
+  workflows                       WorkflowsOnEventTypes[]
+  /// @zod.custom(imports.intervalLimitsType)
+  bookingLimits                   Json?
+  /// @zod.custom(imports.intervalLimitsType)
+  durationLimits                  Json?
+
+  @@unique([userId, slug])
+  @@unique([teamId, slug])
+  @@unique([userId, parentId])
+  @@index([userId])
+  @@index([teamId])
+}
+
+model Credential {
+  id                   Int                   @id @default(autoincrement())
+  // @@type is deprecated
+  type                 String
+  key                  Json
+  user                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               Int?
+  team                 Team?                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId               Int?
+  app                  App?                  @relation(fields: [appId], references: [slug], onDelete: Cascade)
+  // How to make it a required column?
+  appId                String?
+  destinationCalendars DestinationCalendar[]
+  selectedCalendars    SelectedCalendar[]
+  invalid              Boolean?              @default(false)
+  CalendarCache        CalendarCache[]
+
+  @@index([userId])
+  @@index([appId])
+}
+
+enum IdentityProvider {
+  CAL
+  GOOGLE
+  SAML
+}
+
+model DestinationCalendar {
+  id           Int         @id @default(autoincrement())
+  integration  String
+  externalId   String
+  user         User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int?        @unique
+  booking      Booking[]
+  eventType    EventType?  @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  eventTypeId  Int?        @unique
+  credentialId Int?
+  credential   Credential? @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventTypeId])
+  @@index([credentialId])
+}
+
+enum UserPermissionRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id                  Int                  @id @default(autoincrement())
+  username            String?
+  name                String?
+  /// @zod.email()
+  email               String
+  emailVerified       DateTime?
+  password            String?
+  bio                 String?
+  avatar              String?
+  timeZone            String               @default("Europe/London")
+  weekStart           String               @default("Sunday")
+  // DEPRECATED - TO BE REMOVED
+  startTime           Int                  @default(0)
+  endTime             Int                  @default(1440)
+  // </DEPRECATED>
+  bufferTime          Int                  @default(0)
+  hideBranding        Boolean              @default(false)
+  theme               String?
+  createdDate         DateTime             @default(now()) @map(name: "created")
+  trialEndsAt         DateTime?
+  eventTypes          EventType[]          @relation("user_eventtype")
+  credentials         Credential[]
+  teams               Membership[]
+  bookings            Booking[]
+  schedules           Schedule[]
+  defaultScheduleId   Int?
+  selectedCalendars   SelectedCalendar[]
+  completedOnboarding Boolean              @default(false)
+  locale              String?
+  timeFormat          Int?                 @default(12)
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean              @default(false)
+  backupCodes         String?
+  identityProvider    IdentityProvider     @default(CAL)
+  identityProviderId  String?
+  availability        Availability[]
+  invitedTo           Int?
+  webhooks            Webhook[]
+  brandColor          String               @default("#292929")
+  darkBrandColor      String               @default("#fafafa")
+  // the location where the events will end up
+  destinationCalendar DestinationCalendar?
+  away                Boolean              @default(false)
+  // participate in dynamic group booking or not
+  allowDynamicBooking Boolean?             @default(true)
+
+  // participate in SEO indexing or not
+  allowSEOIndexing Boolean? @default(true)
+
+  // receive monthly digest email for teams or not
+  receiveMonthlyDigestEmail Boolean? @default(true)
+
+  /// @zod.custom(imports.userMetadata)
+  metadata             Json?
+  verified             Boolean?                @default(false)
+  role                 UserPermissionRole      @default(USER)
+  disableImpersonation Boolean                 @default(false)
+  impersonatedUsers    Impersonations[]        @relation("impersonated_user")
+  impersonatedBy       Impersonations[]        @relation("impersonated_by_user")
+  apiKeys              ApiKey[]
+  accounts             Account[]
+  sessions             Session[]
+  Feedback             Feedback[]
+  ownedEventTypes      EventType[]             @relation("owner")
+  workflows            Workflow[]
+  routingForms         App_RoutingForms_Form[] @relation("routing-form")
+  verifiedNumbers      VerifiedNumber[]
+  hosts                Host[]
+  organizationId       Int?
+  organization         Team?                   @relation("scope", fields: [organizationId], references: [id], onDelete: SetNull)
+  accessCodes          AccessCode[]
+  // Linking account code for orgs v2
+  //linkedByUserId       Int?
+  //linkedBy             User?                   @relation("linked_account", fields: [linkedByUserId], references: [id], onDelete: Cascade)
+  //linkedUsers          User[]                  @relation("linked_account")*/
+
+  @@unique([email])
+  @@unique([email, username])
+  @@unique([username, organizationId])
+  @@index([emailVerified])
+  @@index([identityProvider])
+  @@index([identityProviderId])
+  @@map(name: "users")
+}
+
+model Team {
+  id                  Int                     @id @default(autoincrement())
+  /// @zod.min(1)
+  name                String
+  /// @zod.min(1)
+  slug                String?
+  logo                String?
+  appLogo             String?
+  appIconLogo         String?
+  bio                 String?
+  hideBranding        Boolean                 @default(false)
+  isPrivate           Boolean                 @default(false)
+  hideBookATeamMember Boolean                 @default(false)
+  members             Membership[]
+  eventTypes          EventType[]
+  workflows           Workflow[]
+  createdAt           DateTime                @default(now())
+  /// @zod.custom(imports.teamMetadataSchema)
+  metadata            Json?
+  theme               String?
+  brandColor          String                  @default("#292929")
+  darkBrandColor      String                  @default("#fafafa")
+  verifiedNumbers     VerifiedNumber[]
+  parentId            Int?
+  parent              Team?                   @relation("organization", fields: [parentId], references: [id], onDelete: Cascade)
+  children            Team[]                  @relation("organization")
+  orgUsers            User[]                  @relation("scope")
+  inviteTokens        VerificationToken[]
+  webhooks            Webhook[]
+  timeFormat          Int?
+  timeZone            String                  @default("Europe/London")
+  weekStart           String                  @default("Sunday")
+  routingForms        App_RoutingForms_Form[]
+  apiKeys             ApiKey[]
+  credentials         Credential[]
+  accessCodes         AccessCode[]
+
+  @@unique([slug, parentId])
+}
+
+enum MembershipRole {
+  MEMBER
+  ADMIN
+  OWNER
+}
+
+model Membership {
+  id                   Int            @id @default(autoincrement())
+  teamId               Int
+  userId               Int
+  accepted             Boolean        @default(false)
+  role                 MembershipRole
+  team                 Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  disableImpersonation Boolean        @default(false)
+
+  @@unique([userId, teamId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model VerificationToken {
+  id            Int      @id @default(autoincrement())
+  identifier    String
+  token         String   @unique
+  expires       DateTime
+  expiresInDays Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  teamId        Int?
+  team          Team?    @relation(fields: [teamId], references: [id])
+
+  @@unique([identifier, token])
+  @@index([token])
+}
+
+model BookingReference {
+  id                 Int      @id @default(autoincrement())
+  /// @zod.min(1)
+  type               String
+  /// @zod.min(1)
+  uid                String
+  meetingId          String?
+  meetingPassword    String?
+  meetingUrl         String?
+  booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId          Int?
+  externalCalendarId String?
+  deleted            Boolean?
+  credentialId       Int?
+
+  @@index([bookingId])
+  @@index([credentialId])
+  @@index([type])
+  @@index([uid])
+}
+
+model Attendee {
+  id          Int          @id @default(autoincrement())
+  email       String
+  name        String
+  timeZone    String
+  locale      String?      @default("en")
+  booking     Booking?     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId   Int?
+  bookingSeat BookingSeat?
+
+  @@index([email])
+  @@index([bookingId])
+}
+
+enum BookingStatus {
+  CANCELLED @map("cancelled")
+  ACCEPTED  @map("accepted")
+  REJECTED  @map("rejected")
+  PENDING   @map("pending")
+}
+
+model Booking {
+  id                    Int                  @id @default(autoincrement())
+  uid                   String               @unique
+  user                  User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                Int?
+  references            BookingReference[]
+  eventType             EventType?           @relation(fields: [eventTypeId], references: [id])
+  eventTypeId           Int?
+  title                 String
+  description           String?
+  customInputs          Json?
+  /// @zod.custom(imports.bookingResponses)
+  responses             Json?
+  startTime             DateTime
+  endTime               DateTime
+  attendees             Attendee[]
+  location              String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime?
+  status                BookingStatus        @default(ACCEPTED)
+  paid                  Boolean              @default(false)
+  payment               Payment[]
+  destinationCalendar   DestinationCalendar? @relation(fields: [destinationCalendarId], references: [id])
+  destinationCalendarId Int?
+  cancellationReason    String?
+  rejectionReason       String?
+  dynamicEventSlugRef   String?
+  dynamicGroupSlugRef   String?
+  rescheduled           Boolean?
+  fromReschedule        String?
+  recurringEventId      String?
+  smsReminderNumber     String?
+  workflowReminders     WorkflowReminder[]
+  scheduledJobs         String[]
+  seatsReferences       BookingSeat[]
+  /// @zod.custom(imports.bookingMetadataSchema)
+  metadata              Json?
+  isRecorded            Boolean              @default(false)
+
+  @@index([eventTypeId])
+  @@index([userId])
+  @@index([destinationCalendarId])
+  @@index([recurringEventId])
+  @@index([uid])
+  @@index([status])
+}
+
+model Schedule {
+  id           Int            @id @default(autoincrement())
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  eventType    EventType[]
+  name         String
+  timeZone     String?
+  availability Availability[]
+
+  @@index([userId])
+}
+
+model Availability {
+  id          Int        @id @default(autoincrement())
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int?
+  eventType   EventType? @relation(fields: [eventTypeId], references: [id])
+  eventTypeId Int?
+  days        Int[]
+  startTime   DateTime   @db.Time
+  endTime     DateTime   @db.Time
+  date        DateTime?  @db.Date
+  Schedule    Schedule?  @relation(fields: [scheduleId], references: [id])
+  scheduleId  Int?
+
+  @@index([userId])
+  @@index([eventTypeId])
+  @@index([scheduleId])
+}
+
+model SelectedCalendar {
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  integration  String
+  externalId   String
+  credential   Credential? @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  credentialId Int?
+
+  @@id([userId, integration, externalId])
+  @@index([userId])
+  @@index([integration])
+  @@index([externalId])
+}
+
+enum EventTypeCustomInputType {
+  TEXT     @map("text")
+  TEXTLONG @map("textLong")
+  NUMBER   @map("number")
+  BOOL     @map("bool")
+  RADIO    @map("radio")
+  PHONE    @map("phone")
+}
+
+model EventTypeCustomInput {
+  id          Int                      @id @default(autoincrement())
+  eventTypeId Int
+  eventType   EventType                @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  label       String
+  type        EventTypeCustomInputType
+  /// @zod.custom(imports.customInputOptionSchema)
+  options     Json?
+  required    Boolean
+  placeholder String                   @default("")
+
+  @@index([eventTypeId])
+}
+
+model ResetPasswordRequest {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String
+  expires   DateTime
+}
+
+enum ReminderType {
+  PENDING_BOOKING_CONFIRMATION
+}
+
+model ReminderMail {
+  id             Int          @id @default(autoincrement())
+  referenceId    Int
+  reminderType   ReminderType
+  elapsedMinutes Int
+  createdAt      DateTime     @default(now())
+
+  @@index([referenceId])
+  @@index([reminderType])
+}
+
+model Payment {
+  id            Int            @id @default(autoincrement())
+  uid           String         @unique
+  app           App?           @relation(fields: [appId], references: [slug], onDelete: Cascade)
+  appId         String?
+  bookingId     Int
+  booking       Booking?       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount        Int
+  fee           Int
+  currency      String
+  success       Boolean
+  refunded      Boolean
+  data          Json
+  externalId    String         @unique
+  paymentOption PaymentOption? @default(ON_BOOKING)
+
+  @@index([bookingId])
+  @@index([externalId])
+}
+
+enum PaymentOption {
+  ON_BOOKING
+  HOLD
+}
+
+enum WebhookTriggerEvents {
+  BOOKING_CREATED
+  BOOKING_PAID
+  BOOKING_RESCHEDULED
+  BOOKING_REQUESTED
+  BOOKING_CANCELLED
+  BOOKING_REJECTED
+  FORM_SUBMITTED
+  MEETING_ENDED
+  RECORDING_READY
+}
+
+model Webhook {
+  id              String                 @id @unique
+  userId          Int?
+  teamId          Int?
+  eventTypeId     Int?
+  /// @zod.url()
+  subscriberUrl   String
+  payloadTemplate String?
+  createdAt       DateTime               @default(now())
+  active          Boolean                @default(true)
+  eventTriggers   WebhookTriggerEvents[]
+  user            User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team            Team?                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  eventType       EventType?             @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  app             App?                   @relation(fields: [appId], references: [slug], onDelete: Cascade)
+  appId           String?
+  secret          String?
+
+  @@unique([userId, subscriberUrl], name: "courseIdentifier")
+}
+
+model Impersonations {
+  id                 Int      @id @default(autoincrement())
+  createdAt          DateTime @default(now())
+  impersonatedUser   User     @relation("impersonated_user", fields: [impersonatedUserId], references: [id], onDelete: Cascade)
+  impersonatedBy     User     @relation("impersonated_by_user", fields: [impersonatedById], references: [id], onDelete: Cascade)
+  impersonatedUserId Int
+  impersonatedById   Int
+}
+
+model ApiKey {
+  id         String    @id @unique @default(cuid())
+  userId     Int
+  teamId     Int?
+  note       String?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  hashedKey  String    @unique()
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team       Team?     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  app        App?      @relation(fields: [appId], references: [slug], onDelete: Cascade)
+  appId      String?
+
+  @@index([userId])
+}
+
+model HashedLink {
+  id          Int       @id @default(autoincrement())
+  link        String    @unique()
+  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  eventTypeId Int       @unique
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@index([type])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum AppCategories {
+  calendar
+  messaging
+  other
+  payment
+  video // deprecated, please use 'conferencing' instead
+  web3 // deprecated, we should no longer have any web3 apps
+  automation
+  analytics
+  // Wherever video is in use, conferencing should also be used for legacy apps can have it.
+  conferencing
+  crm
+}
+
+model App {
+  // The slug for the app store public page inside `/apps/[slug]`
+  slug        String          @id @unique
+  // The directory name for `/packages/app-store/[dirName]`
+  dirName     String          @unique
+  // Needed API Keys
+  keys        Json?
+  // One or multiple categories to which this app belongs
+  categories  AppCategories[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  credentials Credential[]
+  payments    Payment[]
+  Webhook     Webhook[]
+  ApiKey      ApiKey[]
+  enabled     Boolean         @default(false)
+
+  @@index([enabled])
+}
+
+model App_RoutingForms_Form {
+  id          String                          @id @default(cuid())
+  description String?
+  position    Int                             @default(0)
+  routes      Json?
+  createdAt   DateTime                        @default(now())
+  updatedAt   DateTime                        @updatedAt
+  name        String
+  fields      Json?
+  user        User                            @relation("routing-form", fields: [userId], references: [id], onDelete: Cascade)
+  // This is the user who created the form and also the user who has read-write access to the form
+  // If teamId is set, the members of the team would also have access to form readOnly or read-write depending on their permission level as team member.
+  userId      Int
+  team        Team?                           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId      Int?
+  responses   App_RoutingForms_FormResponse[]
+  disabled    Boolean                         @default(false)
+  /// @zod.custom(imports.RoutingFormSettings)
+  settings    Json?
+
+  @@index([userId])
+  @@index([disabled])
+}
+
+model App_RoutingForms_FormResponse {
+  id           Int                   @id @default(autoincrement())
+  formFillerId String                @default(cuid())
+  form         App_RoutingForms_Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId       String
+  response     Json
+  createdAt    DateTime              @default(now())
+
+  @@unique([formFillerId, formId])
+  @@index([formFillerId])
+  @@index([formId])
+}
+
+model Feedback {
+  id      Int      @id @default(autoincrement())
+  date    DateTime @default(now())
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating  String
+  comment String?
+
+  @@index([userId])
+  @@index([rating])
+}
+
+enum WorkflowTriggerEvents {
+  BEFORE_EVENT
+  EVENT_CANCELLED
+  NEW_EVENT
+  AFTER_EVENT
+  RESCHEDULE_EVENT
+}
+
+enum WorkflowActions {
+  EMAIL_HOST
+  EMAIL_ATTENDEE
+  SMS_ATTENDEE
+  SMS_NUMBER
+  EMAIL_ADDRESS
+  WHATSAPP_ATTENDEE
+  WHATSAPP_NUMBER
+}
+
+model WorkflowStep {
+  id                        Int                @id @default(autoincrement())
+  stepNumber                Int
+  action                    WorkflowActions
+  workflowId                Int
+  workflow                  Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  sendTo                    String?
+  reminderBody              String?
+  emailSubject              String?
+  template                  WorkflowTemplates  @default(REMINDER)
+  workflowReminders         WorkflowReminder[]
+  numberRequired            Boolean?
+  sender                    String?
+  numberVerificationPending Boolean            @default(true)
+  includeCalendarEvent      Boolean            @default(false)
+
+  @@index([workflowId])
+}
+
+model Workflow {
+  id       Int                     @id @default(autoincrement())
+  position Int                     @default(0)
+  name     String
+  userId   Int?
+  user     User?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team     Team?                   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId   Int?
+  activeOn WorkflowsOnEventTypes[]
+  trigger  WorkflowTriggerEvents
+  time     Int?
+  timeUnit TimeUnit?
+  steps    WorkflowStep[]
+
+  @@index([userId])
+  @@index([teamId])
+}
+
+model WorkflowsOnEventTypes {
+  id          Int       @id @default(autoincrement())
+  workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId  Int
+  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  eventTypeId Int
+
+  @@unique([workflowId, eventTypeId])
+  @@index([workflowId])
+  @@index([eventTypeId])
+}
+
+model Deployment {
+  /// This is a single row table, so we use a fixed id
+  id              Int       @id @default(1)
+  logo            String?
+  /// @zod.custom(imports.DeploymentTheme)
+  theme           Json?
+  licenseKey      String?
+  agreedLicenseAt DateTime?
+}
+
+enum TimeUnit {
+  DAY    @map("day")
+  HOUR   @map("hour")
+  MINUTE @map("minute")
+}
+
+model WorkflowReminder {
+  id              Int             @id @default(autoincrement())
+  bookingUid      String?
+  booking         Booking?        @relation(fields: [bookingUid], references: [uid])
+  method          WorkflowMethods
+  scheduledDate   DateTime
+  referenceId     String?         @unique
+  scheduled       Boolean
+  workflowStepId  Int?
+  workflowStep    WorkflowStep?   @relation(fields: [workflowStepId], references: [id])
+  cancelled       Boolean?
+  seatReferenceId String?
+
+  @@index([bookingUid])
+  @@index([workflowStepId])
+  @@index([seatReferenceId])
+}
+
+model WebhookScheduledTriggers {
+  id            Int       @id @default(autoincrement())
+  jobName       String
+  subscriberUrl String
+  payload       String
+  startAfter    DateTime
+  retryCount    Int       @default(0)
+  createdAt     DateTime? @default(now())
+}
+
+enum WorkflowTemplates {
+  REMINDER
+  CUSTOM
+  CANCELLED
+  RESCHEDULED
+  COMPLETED
+}
+
+enum WorkflowMethods {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+model BookingSeat {
+  id           Int      @id @default(autoincrement())
+  referenceUid String   @unique
+  bookingId    Int
+  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  attendeeId   Int      @unique
+  attendee     Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+  data         Json?
+
+  @@index([bookingId])
+  @@index([attendeeId])
+}
+
+model VerifiedNumber {
+  id          Int    @id @default(autoincrement())
+  userId      Int?
+  user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId      Int?
+  team        Team?  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  phoneNumber String
+
+  @@index([userId])
+  @@index([teamId])
+}
+
+model Feature {
+  // The feature slug, ex: 'v2-workflows'
+  slug        String       @id @unique
+  // If the feature is currently enabled
+  enabled     Boolean      @default(false)
+  // A short description of the feature
+  description String?
+  // The type of feature flag
+  type        FeatureType? @default(RELEASE)
+  // If the flag is considered stale
+  stale       Boolean?     @default(false)
+  lastUsedAt  DateTime?
+  createdAt   DateTime?    @default(now())
+  updatedAt   DateTime?    @default(now()) @updatedAt
+  updatedBy   Int?
+
+  @@index([enabled])
+  @@index([stale])
+}
+
+enum FeatureType {
+  RELEASE
+  EXPERIMENT
+  OPERATIONAL
+  KILL_SWITCH
+  PERMISSION
+}
+
+model SelectedSlots {
+  id               Int      @id @default(autoincrement())
+  eventTypeId      Int
+  userId           Int
+  slotUtcStartDate DateTime
+  slotUtcEndDate   DateTime
+  uid              String
+  releaseAt        DateTime
+  isSeat           Boolean  @default(false)
+
+  @@unique(fields: [userId, slotUtcStartDate, slotUtcEndDate, uid], name: "selectedSlotUnique")
+}
+
+model OAuthClient {
+  clientId     String       @id @unique
+  redirectUri  String
+  clientSecret String
+  name         String
+  logo         String?
+  accessCodes  AccessCode[]
+}
+
+model AccessCode {
+  id        Int           @id @default(autoincrement())
+  code      String
+  clientId  String?
+  client    OAuthClient?  @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  expiresAt DateTime
+  scopes    AccessScope[]
+  userId    Int?
+  user      User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId    Int?
+  team      Team?         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
+
+enum AccessScope {
+  READ_BOOKING
+  READ_PROFILE
+}
+
+view BookingTimeStatus {
+  id            Int            @unique
+  uid           String?
+  eventTypeId   Int?
+  title         String?
+  description   String?
+  startTime     DateTime?
+  endTime       DateTime?
+  createdAt     DateTime?
+  location      String?
+  paid          Boolean?
+  status        BookingStatus?
+  rescheduled   Boolean?
+  userId        Int?
+  teamId        Int?
+  eventLength   Int?
+  timeStatus    String?
+  eventParentId Int?
+}
+
+model CalendarCache {
+  // The key would be the unique URL that is requested by the user
+  key          String
+  value        Json
+  expiresAt    DateTime
+  credentialId Int
+  credential   Credential? @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+
+  @@id([credentialId, key])
+  @@unique([credentialId, key])
+}
+
+enum PipelineTriggers {
+  responseCreated
+  responseUpdated
+  responseFinished
+}
+
+enum WehbhookSource {
+  user
+  zapier
+}
+
+model Webhooks {
+  id            String             @id @default(cuid())
+  name          String?
+  createdAt     DateTime           @default(now()) @map(name: "created_at")
+  updatedAt     DateTime           @updatedAt @map(name: "updated_at")
+  url           String
+  source        WehbhookSource     @default(user)
+  environment   Environment        @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId String
+  triggers      PipelineTriggers[]
+  surveyIds     String[]
+}
+
+model Attribute {
+  id               String         @id @default(cuid())
+  createdAt        DateTime       @default(now()) @map(name: "created_at")
+  updatedAt        DateTime       @updatedAt @map(name: "updated_at")
+  attributeClass   AttributeClass @relation(fields: [attributeClassId], references: [id], onDelete: Cascade)
+  attributeClassId String
+  person           Person         @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId         String
+  value            String
+
+  @@unique([attributeClassId, personId])
+}
+
+enum AttributeType {
+  code
+  noCode
+  automatic
+}
+
+model AttributeClass {
+  id               String                  @id @default(cuid())
+  createdAt        DateTime                @default(now()) @map(name: "created_at")
+  updatedAt        DateTime                @updatedAt @map(name: "updated_at")
+  name             String
+  description      String?
+  archived         Boolean                 @default(false)
+  type             AttributeType
+  environment      Environment             @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId    String
+  attributes       Attribute[]
+  attributeFilters SurveyAttributeFilter[]
+
+  @@unique([name, environmentId])
+}
+
+model Person {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now()) @map(name: "created_at")
+  updatedAt     DateTime    @updatedAt @map(name: "updated_at")
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId String
+  responses     Response[]
+  sessions      Sessions[]
+  attributes    Attribute[]
+  displays      Display[]
+}
+
+model Response {
+  id               String            @id @default(cuid())
+  createdAt        DateTime          @default(now()) @map(name: "created_at")
+  updatedAt        DateTime          @updatedAt @map(name: "updated_at")
+  finished         Boolean           @default(false)
+  survey           Survey            @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId         String
+  person           Person?           @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId         String?
+  notes            ResponseNote[]
+  /// @zod.custom(imports.ZResponseData)
+  /// [ResponseData]
+  data             Json              @default("{}")
+  /// @zod.custom(imports.ZResponseMeta)
+  /// [ResponseMeta]
+  meta             Json              @default("{}")
+  tags             TagsOnResponses[]
+  /// @zod.custom(imports.ZResponsePersonAttributes)
+  /// [ResponsePersonAttributes]
+  personAttributes Json?
+}
+
+model ResponseNote {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @updatedAt @map(name: "updated_at")
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  responseId String
+  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  text       String
+  isResolved Boolean  @default(false)
+  isEdited   Boolean  @default(false)
+}
+
+model Tag {
+  id            String            @id @default(cuid())
+  createdAt     DateTime          @default(now()) @map(name: "created_at")
+  updatedAt     DateTime          @updatedAt @map(name: "updated_at")
+  name          String
+  responses     TagsOnResponses[]
+  environmentId String
+  environment   Environment       @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  @@unique([environmentId, name])
+}
+
+model TagsOnResponses {
+  responseId String
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  tagId      String
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([responseId, tagId])
+}
+
+enum SurveyStatus {
+  draft
+  inProgress
+  paused
+  completed
+}
+
+enum DisplayStatus {
+  seen
+  responded
+}
+
+model Display {
+  id        String        @id @default(cuid())
+  createdAt DateTime      @default(now()) @map(name: "created_at")
+  updatedAt DateTime      @updatedAt @map(name: "updated_at")
+  survey    Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId  String
+  person    Person?       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String?
+  status    DisplayStatus @default(seen)
+}
+
+model SurveyTrigger {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now()) @map(name: "created_at")
+  updatedAt    DateTime   @updatedAt @map(name: "updated_at")
+  survey       Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId     String
+  eventClass   EventClass @relation(fields: [eventClassId], references: [id], onDelete: Cascade)
+  eventClassId String
+
+  @@unique([surveyId, eventClassId])
+}
+
+enum SurveyAttributeFilterCondition {
+  equals
+  notEquals
+}
+
+model SurveyAttributeFilter {
+  id               String                         @id @default(cuid())
+  createdAt        DateTime                       @default(now()) @map(name: "created_at")
+  updatedAt        DateTime                       @updatedAt @map(name: "updated_at")
+  attributeClass   AttributeClass                 @relation(fields: [attributeClassId], references: [id], onDelete: Cascade)
+  attributeClassId String
+  survey           Survey                         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId         String
+  condition        SurveyAttributeFilterCondition
+  value            String
+
+  @@unique([surveyId, attributeClassId])
+}
+
+enum SurveyType {
+  email
+  link
+  mobile
+  web
+}
+
+enum displayOptions {
+  displayOnce
+  displayMultiple
+  respondMultiple
+}
+
+model Survey {
+  id                  String                  @id @default(cuid())
+  createdAt           DateTime                @default(now()) @map(name: "created_at")
+  updatedAt           DateTime                @updatedAt @map(name: "updated_at")
+  name                String
+  redirectUrl         String?
+  type                SurveyType              @default(web)
+  environment         Environment             @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId       String
+  status              SurveyStatus            @default(draft)
+  /// @zod.custom(imports.ZSurveyQuestions)
+  /// [SurveyQuestions]
+  questions           Json                    @default("[]")
+  /// @zod.custom(imports.ZSurveyThankYouCard)
+  /// [SurveyThankYouCard]
+  thankYouCard        Json                    @default("{\"enabled\": false}")
+  responses           Response[]
+  displayOption       displayOptions          @default(displayOnce)
+  recontactDays       Int?
+  triggers            SurveyTrigger[]
+  attributeFilters    SurveyAttributeFilter[]
+  displays            Display[]
+  autoClose           Int?
+  delay               Int                     @default(0)
+  autoComplete        Int?
+  closeOnDate         DateTime?
+  /// @zod.custom(imports.ZSurveyClosedMessage)
+  /// [SurveyClosedMessage]
+  surveyClosedMessage Json?
+  /// @zod.custom(imports.ZSurveyVerifyEmail)
+  /// [SurveyVerifyEmail]
+  verifyEmail         Json?
+}
+
+model Event {
+  id           String      @id @default(cuid())
+  createdAt    DateTime    @default(now()) @map(name: "created_at")
+  eventClass   EventClass? @relation(fields: [eventClassId], references: [id])
+  eventClassId String?
+  session      Sessions    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId    String
+  /// @zod.custom(imports.ZEventProperties)
+  /// @zod.custom(imports.ZEventProperties)
+  /// [EventProperties]
+  properties   Json        @default("{}")
+}
+
+enum EventTypes {
+  code
+  noCode
+  automatic
+}
+
+model EventClass {
+  id            String          @id @default(cuid())
+  createdAt     DateTime        @default(now()) @map(name: "created_at")
+  updatedAt     DateTime        @updatedAt @map(name: "updated_at")
+  name          String
+  description   String?
+  type          EventTypes
+  events        Event[]
+  /// @zod.custom(imports.ZActionClassNoCodeConfig)
+  /// [EventClassNoCodeConfig]
+  noCodeConfig  Json?
+  environment   Environment     @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId String
+  surveys       SurveyTrigger[]
+
+  @@unique([name, environmentId])
+}
+
+model Sessions {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  expiresAt DateTime @default(now())
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+  events    Event[]
+}
+
+enum EnvironmentType {
+  production
+  development
+}
+
+enum IntegrationType {
+  googleSheets
+}
+
+model Integration {
+  id            String          @id @default(cuid())
+  type          IntegrationType
+  environmentId String
+  /// @zod.custom(imports.ZIntegrationConfig)
+  /// [IntegrationConfig]
+  config        Json
+  environment   Environment     @relation(fields: [environmentId], references: [id])
+
+  @@unique([type, environmentId])
+}
+
+model Environment {
+  id                   String           @id @default(cuid())
+  createdAt            DateTime         @default(now()) @map(name: "created_at")
+  updatedAt            DateTime         @updatedAt @map(name: "updated_at")
+  type                 EnvironmentType
+  product              Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId            String
+  widgetSetupCompleted Boolean          @default(false)
+  surveys              Survey[]
+  people               Person[]
+  eventClasses         EventClass[]
+  attributeClasses     AttributeClass[]
+  apiKeys              ApiKeys[]
+  webhooks             Webhooks[]
+  tags                 Tag[]
+  integration          Integration[]
+}
+
+enum WidgetPlacement {
+  bottomLeft
+  bottomRight
+  topLeft
+  topRight
+  center
+}
+
+model Product {
+  id                   String          @id @default(cuid())
+  createdAt            DateTime        @default(now()) @map(name: "created_at")
+  updatedAt            DateTime        @updatedAt @map(name: "updated_at")
+  name                 String
+  team                 Teams           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId               String
+  environments         Environment[]
+  brandColor           String          @default("#64748b")
+  highlightBorderColor String?
+  recontactDays        Int             @default(7)
+  formbricksSignature  Boolean         @default(true)
+  placement            WidgetPlacement @default(bottomRight)
+  clickOutsideClose    Boolean         @default(true)
+  darkOverlay          Boolean         @default(false)
+}
+
+enum Plan {
+  free
+  pro
+}
+
+model Teams {
+  id               String        @id @default(cuid())
+  createdAt        DateTime      @default(now()) @map(name: "created_at")
+  updatedAt        DateTime      @updatedAt @map(name: "updated_at")
+  name             String
+  memberships      Memberships[]
+  products         Product[]
+  plan             Plan          @default(free)
+  stripeCustomerId String?
+  invites          Invite[]
+}
+
+enum MembershipRoles {
+  owner
+  admin
+  editor
+  developer
+  viewer
+}
+
+model Memberships {
+  team     Teams          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId   String
+  user     Users          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  accepted Boolean        @default(false)
+  role     MembershipRole
+
+  @@id([userId, teamId])
+}
+
+model Invite {
+  id         String          @id @default(uuid())
+  email      String
+  name       String?
+  team       Teams           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId     String
+  creator    Users           @relation("inviteCreatedBy", fields: [creatorId], references: [id])
+  creatorId  String
+  acceptor   Users?          @relation("inviteAcceptedBy", fields: [acceptorId], references: [id], onDelete: Cascade)
+  acceptorId String?
+  accepted   Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  expiresAt  DateTime
+  role       MembershipRoles @default(admin)
+
+  @@index([email, teamId], name: "email_teamId_unique")
+}
+
+model ApiKeys {
+  id            String      @id @unique @default(cuid())
+  createdAt     DateTime    @default(now())
+  lastUsedAt    DateTime?
+  label         String?
+  hashedKey     String      @unique()
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId String
+}
+
+enum IdentityProviders {
+  email
+  github
+  google
+}
+
+model Accounts {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now()) @map(name: "created_at")
+  updatedAt         DateTime @updatedAt @map(name: "updated_at")
+  user              Users?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  access_token      String?  @db.Text
+  refresh_token     String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+}
+
+enum Role {
+  project_manager
+  engineer
+  founder
+  marketing_specialist
+  other
+}
+
+enum Objective {
+  increase_conversion
+  improve_user_retention
+  increase_user_adoption
+  sharpen_marketing_messaging
+  support_sales
+  other
+}
+
+enum Intention {
+  survey_user_segments
+  survey_at_specific_point_in_user_journey
+  enrich_customer_profiles
+  collect_all_user_feedback_on_one_platform
+  other
+}
+
+model Users {
+  id                        String            @id @default(cuid())
+  createdAt                 DateTime          @default(now()) @map(name: "created_at")
+  updatedAt                 DateTime          @updatedAt @map(name: "updated_at")
+  name                      String?
+  email                     String            @unique
+  emailVerified             DateTime?         @map(name: "email_verified")
+  password                  String?
+  onboardingCompleted       Boolean           @default(false)
+  identityProvider          IdentityProviders @default(email)
+  identityProviderAccountId String?
+  memberships               Memberships[]
+  accounts                  Accounts[]
+  responseNotes             ResponseNote[]
+  groupId                   String?
+  invitesCreated            Invite[]          @relation("inviteCreatedBy")
+  invitesAccepted           Invite[]          @relation("inviteAcceptedBy")
+  role                      Role?
+  objective                 Objective?
+  /// @zod.custom(imports.ZUserNotificationSettings)
+  /// @zod.custom(imports.ZUserNotificationSettings)
+  /// [UserNotificationSettings]
+  notificationSettings      Json              @default("{}")
+   workouts    Workout[]
+  fitnessData FitnessData?
+}
+
+model FitnessData {
+  id     String @id @default(uuid())
+  ftp    Int
+  user   Users   @relation(fields: [userId], references: [id])
+  userId String @unique
+}
+
+model Workout {
+  id     String              @id @default(uuid())
+  name   String
+  parts  SteadyWorkoutPart[]
+  user   Users                @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model SteadyWorkoutPart {
+  index     Int
+  duration  Int
+  power     Int
+  workout   Workout @relation(fields: [workoutId], references: [id])
+  workoutId String
+  @@unique([index, workoutId])
+}
+
+
+model ClaimableCustomPlan {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  claimedAt    DateTime?
+  name         String
+  description  String?
+  price        Int
+  currency     String
+  workspaceId  String    @unique
+  //workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  chatsLimit   Int
+  storageLimit Int
+  seatsLimit   Int
+  isYearly     Boolean   @default(false)
+  companyName  String?
+  vatType      String?
+  vatValue     String?
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  state     Json
+}
+
+model ThemeTemplate {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  name        String
+  theme       Json
+  //workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+}
+
+enum WorkspaceRole {
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum GraphNavigation {
+  MOUSE
+  TRACKPAD
+}
+
+enum Plans {
+  FREE
+  STARTER
+  PRO
+  LIFETIME
+  OFFERED
+  CUSTOM
+  UNLIMITED
+}
+
+enum CollaborationType {
+  READ
+  WRITE
+  FULL_ACCESS
+}
+
+model DashboardFolder {
+  id             String            @id @default(cuid())
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @default(now()) @updatedAt
+  name           String
+  parentFolderId String?
+  workspaceId    String
+  parentFolder   DashboardFolder?  @relation("ParentChild", fields: [parentFolderId], references: [id])
+  //workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  childrenFolder DashboardFolder[] @relation("ParentChild")
+  typebots       Typebot[]
+}
+
+model Typebot {
+  id                      String                    @id @default(cuid())
+  version                 String?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @default(now()) @updatedAt
+  icon                    String?
+  name                    String
+  folderId                String?
+  groups                  Json
+  variables               Json
+  edges                   Json
+  theme                   Json
+  selectedThemeTemplateId String?
+  settings                Json
+  publicId                String?                   @unique
+  customDomain            String?                   @unique
+  workspaceId             String
+  resultsTablePreferences Json?
+  folder                  DashboardFolder?          @relation(fields: [folderId], references: [id])
+  //workspace               Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  collaborators           CollaboratorsOnTypebots[]
+  invitations             Invitation[]
+  publishedTypebot        PublicTypebot?
+  results                 Result[]
+  //webhooks                Webhook[]
+  isArchived              Boolean                   @default(false)
+  isClosed                Boolean                   @default(false)
+  whatsAppCredentialsId   String?
+
+  @@index([workspaceId])
+  @@index([isArchived, createdAt(sort: Desc)])
+}
+
+model Invitation {
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @default(now()) @updatedAt
+  email     String
+  typebotId String
+  type      CollaborationType
+  typebot   Typebot           @relation(fields: [typebotId], references: [id], onDelete: Cascade)
+
+  @@unique([email, typebotId])
+}
+
+model CollaboratorsOnTypebots {
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @default(now()) @updatedAt
+  userId    String
+  typebotId String
+  type      CollaborationType
+  typebot   Typebot           @relation(fields: [typebotId], references: [id], onDelete: Cascade)
+  //user      Users              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, typebotId])
+}
+
+model PublicTypebot {
+  id        String   @id @default(cuid())
+  version   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  typebotId String   @unique
+  groups    Json
+  variables Json
+  edges     Json
+  theme     Json
+  settings  Json
+  typebot   Typebot  @relation(fields: [typebotId], references: [id], onDelete: Cascade)
+}
+
+model Result {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  typebotId   String
+  variables   Json
+  isCompleted Boolean
+  hasStarted  Boolean?
+  isArchived  Boolean? @default(false)
+  typebot     Typebot  @relation(fields: [typebotId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+  logs        Log[]
+
+  @@index([typebotId, hasStarted, createdAt(sort: Desc)])
+  @@index([typebotId, isCompleted])
+}
+
+model Log {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  resultId    String
+  status      String
+  description String
+  details     String?
+  result      Result   @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@index([resultId])
+}
+
+model Answer {
+  createdAt   DateTime @default(now()) @updatedAt
+  resultId    String
+  blockId     String
+  itemId      String?
+  groupId     String
+  variableId  String?
+  content     String
+  storageUsed Int?
+  result      Result   @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@unique([resultId, blockId, groupId])
+  @@index([blockId, itemId])
+  @@index([storageUsed])
+}
+
+model Coupon {
+  userPropertiesToUpdate Json
+  code                   String    @id @unique
+  dateRedeemed           DateTime?
+}
