@@ -4,16 +4,7 @@ const prisma = new PrismaClient()
 
 // A `main` function so that we can use async/await
 async function main() {
-  await prisma.coupon.create({
-    data:{
-      code: 'TEST',
-      dateRedeemed: new Date(),
-      userPropertiesToUpdate: {
-        name: 'TEST'
-      }
-
-    }
-  })
+  
 }
 
 main()
