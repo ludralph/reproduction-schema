@@ -6,9 +6,6 @@ This repository attempts to reproduce the problems discussed in this [github iss
 
 ### 1. Clone the repository and run npm install to install the dependencies
 
-
-<details><summary><strong>Alternative:</strong> Clone the entire repo</summary>
-
 Clone this repository:
 
 ```
@@ -22,14 +19,12 @@ cd reproduction-schema
 npm install
 ```
 
-</details>
-
 ### 2. Create the database
 
 create a .env file at the root and add an environment variable `DB_URL`
 The value of `DB_URL` will be your database connection string
-For example: DB_URL=postgresql://raphaeletim:xxxx@localhost:5432/postgres
-where xxxx represents your password
+For example: DB_URL=postgresql://username:password@localhost:5432/postgres
+
 
 ### 3. Generate the Prisma Client
 
