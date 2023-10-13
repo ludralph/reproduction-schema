@@ -2,14 +2,15 @@
   "name": "script",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node ./script.ts"
+    "dev": "ts-node ./script.ts",
+    "generate-prisma": "npx prisma generate && node scripts/post-generate.js"
   },
   "dependencies": {
-    "@prisma/client": "4.9.0",
+    "@prisma/client": "5.4.2",
     "@types/node": "18.18.0"
   },
   "devDependencies": {
-    "prisma": "4.9.0",
+    "prisma": "5.4.2",
     "ts-node": "10.9.1",
     "typescript": "5.2.2"
   }
